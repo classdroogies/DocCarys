@@ -49,6 +49,7 @@ CREATE TABLE StockArticle(
 	Reference			INT  NOT NULL ,
 	Quantite			INT  NOT NULL ,
 	QuantiteReservee	INT NOT NULL ,
+	Seuil				INT ,
 	CONSTRAINT prk_constraint_StockArticle PRIMARY KEY NONCLUSTERED (Reference)
 );
 
@@ -76,6 +77,7 @@ CREATE TABLE Client(
 	CodePostalClient VARCHAR (5) NOT NULL ,
 	VilleClient      VARCHAR (250) NOT NULL ,
 	EmailClient      VARCHAR (250) NOT NULL ,
+	TelephoneClient	 VARCHAR (10) ,
 	MotDePasseClient VARCHAR (250) NOT NULL ,
 	CONSTRAINT prk_constraint_Client PRIMARY KEY NONCLUSTERED (NumeroClient),
 	CONSTRAINT UK_EmailClient UNIQUE(EmailClient)
@@ -303,5 +305,5 @@ INSERT INTO Article VALUES
 GO
 
 INSERT INTO Client VALUES
-('TOTO', 'Titi', '5 rue Tata', 38000, 'Grenoble', 'toto@toto.fr', 'toto');
+('TOTO', 'Titi', '5 rue Tata', 38000, 'Grenoble', 'toto@toto.fr', '0102030405', 'toto');
 GO
