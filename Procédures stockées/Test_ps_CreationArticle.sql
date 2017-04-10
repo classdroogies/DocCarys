@@ -251,7 +251,7 @@ PRINT 'Résultat attendu = 2; message = ** Le prix d''achat de l''article doit êt
 set @pLibelleArticle = 'Les 3 mousquetaires';
 set @pPrix =12.5;
 set @pIdGenre = 1;
-set @pPrixFournisseur = 0;
+set @pPrixFournisseur = 0.005;
 EXECUTE @codeRetour = ps_CreationArticle @pLibelleArticle, @pPrix, @pPhotoArticle, @pDescriptionArticle, @pIdGenre, @pPrixFournisseur, @pIdFournisseur, @pReapprovisionnable, @oReference OUTPUT, @oMessage OUTPUT;
 PRINT 'Code retour : ' + cast(@codeRetour as char(1));
 PRINT 'Message : ' + @oMessage;

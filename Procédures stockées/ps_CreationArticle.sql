@@ -71,6 +71,12 @@ CREATE PROCEDURE ps_CreationArticle(@pLibelleArticle varchar(200),
 	/* nettoyage du libellé de l'article */
 	SET @pLibelleArticle = dbo.fn_CleanString(@pLibelleArticle);
 
+	/* nettoyage du prix d'achat */
+	if @pPrixFournisseur = 0
+	begin
+		set @pPrixFournisseur = null;
+	end
+
 	/* vérification des paramètres */
 	/* vérif de la cohérence du libellé de l'article */
 	if @pLibelleArticle is null
@@ -108,7 +114,7 @@ CREATE PROCEDURE ps_CreationArticle(@pLibelleArticle varchar(200),
 		set @codeRet = @paramNonConforme;
 	end
 
-	/* vérif de la cohérence du prix */
+	/* vérif de la cohérence du prix d'achat */
 	else if @pPrixFournisseur is not null and  @pPrixFournisseur not between 0.01 and 50
 	begin
 		set @oMessage = ' ** Le prix d''achat de l''article doit être compris entre 0.01€ et 50€. ** ';

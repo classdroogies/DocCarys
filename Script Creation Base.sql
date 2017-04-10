@@ -28,29 +28,29 @@ CREATE TABLE Promotion(
 -- Table: Article
 ------------------------------------------------------------*/
 CREATE TABLE Article(
-	Reference      		INT IDENTITY (1,1) NOT NULL ,
-	LibelleArticle 		VARCHAR (200) NOT NULL ,
-	Prix           		FLOAT NOT NULL ,
-	PhotoArticle		VARCHAR (200) ,
-	DescriptionArticle	TEXT ,
-	IdGenre        		INT NOT NULL ,
-	PrixFournisseur		FLOAT ,
-	IdFournisseur  		INT  NOT NULL ,
-	Reapprovisionnable	bit ,
-	CONSTRAINT prk_constraint_Article PRIMARY KEY NONCLUSTERED (Reference),
-	CONSTRAINT UK_LibelleArticle UNIQUE(LibelleArticle)
+	Reference          INT IDENTITY (1,1) NOT NULL ,
+	LibelleArticle     VARCHAR (200) NOT NULL ,
+	Prix               FLOAT  NOT NULL ,
+	PhotoArticle       VARCHAR (200)  ,
+	DescriptionArticle TEXT ,
+	Reapprovisionnable bit   ,	
+	IdStock            INT   ,
+	IdGenre            INT  NOT NULL ,
+	PrixAchat          FLOAT   ,
+	IdFournisseur      INT  NOT NULL ,
+	CONSTRAINT prk_constraint_Article PRIMARY KEY NONCLUSTERED (Reference)
 );
-
 
 /*------------------------------------------------------------
 -- Table: StockArticle
 ------------------------------------------------------------*/
 CREATE TABLE StockArticle(
-	Reference			INT  NOT NULL ,
-	Quantite			INT  NOT NULL ,
-	QuantiteReservee	INT NOT NULL ,
-	Seuil				INT ,
-	CONSTRAINT prk_constraint_StockArticle PRIMARY KEY NONCLUSTERED (Reference)
+	IdStock         INT IDENTITY (1,1) NOT NULL ,
+	Quantite        INT  NOT NULL ,
+	QuantiteReserve INT  NOT NULL ,
+	Seuil           INT   ,
+	Reference       INT  NOT NULL ,
+	CONSTRAINT prk_constraint_StockArticle PRIMARY KEY NONCLUSTERED (IdStock)
 );
 
 
@@ -77,7 +77,7 @@ CREATE TABLE Client(
 	CodePostalClient VARCHAR (5) NOT NULL ,
 	VilleClient      VARCHAR (250) NOT NULL ,
 	EmailClient      VARCHAR (250) NOT NULL ,
-	TelephoneClient	 VARCHAR (10) ,
+	TelephoneClient	 VARCHAR (10) NOT NULL,
 	MotDePasseClient VARCHAR (250) NOT NULL ,
 	CONSTRAINT prk_constraint_Client PRIMARY KEY NONCLUSTERED (NumeroClient),
 	CONSTRAINT UK_EmailClient UNIQUE(EmailClient)
@@ -85,13 +85,13 @@ CREATE TABLE Client(
 
 
 /*------------------------------------------------------------
--- Table: Role
+-- Table: RoleActeur
 ------------------------------------------------------------*/
-CREATE TABLE Role(
-	IdRole      INT IDENTITY (1,1) NOT NULL ,
-	LibelleRole VARCHAR (200) NOT NULL ,
-	CONSTRAINT prk_constraint_Role PRIMARY KEY NONCLUSTERED (IdRole),
-	CONSTRAINT UK_LibelleRole UNIQUE(LibelleRole)
+CREATE TABLE RoleActeur(
+	IdRoleActeur      INT IDENTITY (1,1) NOT NULL ,
+	LibelleRoleActeur VARCHAR (200) NOT NULL ,
+	CONSTRAINT prk_constraint_RoleActeur PRIMARY KEY NONCLUSTERED (IdRoleActeur),
+	CONSTRAINT UK_LibelleRoleActeur UNIQUE(LibelleRoleActeur)
 );
 
 
@@ -150,7 +150,7 @@ CREATE TABLE Livraison(
 CREATE TABLE Acteur(
 	IdActeur  INT IDENTITY (1,1) NOT NULL ,
 	NomActeur VARCHAR (200) NOT NULL ,
-	IdRole    INT  NOT NULL ,
+	IdRoleActeur    INT  NOT NULL ,
 	CONSTRAINT prk_constraint_Acteur PRIMARY KEY NONCLUSTERED (IdActeur),
 	CONSTRAINT UK_NomActeur UNIQUE(NomActeur)
 );
@@ -162,9 +162,9 @@ CREATE TABLE Acteur(
 CREATE TABLE PanierCommande(
 	NumeroCommande INT IDENTITY (1,1) NOT NULL ,
 	DateCommande   DATETIME NOT NULL ,
-	EtatCommande   VARCHAR (200) NOT NULL ,
-	IdPaiement  	INT  NOT NULL ,
-	NumeroClient   INT  NOT NULL ,
+	IdEtat         INT  NOT NULL ,
+	IdPaiement  	INT,
+	NumeroClient   INT NOT NULL,
 	CONSTRAINT prk_constraint_PanierCommande PRIMARY KEY NONCLUSTERED (NumeroCommande)
 );
 
@@ -189,6 +189,14 @@ CREATE TABLE Batch(
 	CONSTRAINT prk_constraint_Batch PRIMARY KEY NONCLUSTERED (IdBatch)
 );
 
+/*------------------------------------------------------------
+-- Table: EtatCommande
+------------------------------------------------------------*/
+CREATE TABLE EtatCommande(
+	IdEtat      INT IDENTITY (1,1) NOT NULL ,
+	LibelleEtat VARCHAR (50) NOT NULL ,
+	CONSTRAINT prk_constraint_EtatCommande PRIMARY KEY NONCLUSTERED (IdEtat)
+);
 
 /*------------------------------------------------------------
 -- Table: ActeurArticle
@@ -253,11 +261,10 @@ ALTER TABLE Genre ADD CONSTRAINT FK_Genre_IdCategorie FOREIGN KEY (IdCategorie) 
 ALTER TABLE CommandeFournisseur ADD CONSTRAINT FK_CommandeFournisseur_IdFournisseur FOREIGN KEY (IdFournisseur) REFERENCES Fournisseur(IdFournisseur);
 ALTER TABLE Paiement ADD CONSTRAINT FK_Paiement_NumeroCommande FOREIGN KEY (NumeroCommande) REFERENCES PanierCommande(NumeroCommande);
 ALTER TABLE Livraison ADD CONSTRAINT FK_Livraison_NumeroCommande FOREIGN KEY (NumeroCommande) REFERENCES PanierCommande(NumeroCommande);
-ALTER TABLE Acteur ADD CONSTRAINT FK_Acteur_IdRole FOREIGN KEY (IdRole) REFERENCES Role(IdRole);
-ALTER TABLE PanierCommande ADD CONSTRAINT FK_PanierCommande_IdPaiement FOREIGN KEY (IdPaiement) REFERENCES Paiement(IdPaiement);
-ALTER TABLE PanierCommande ADD CONSTRAINT FK_PanierCommande_NumeroClient FOREIGN KEY (NumeroClient) REFERENCES Client(NumeroClient);
+ALTER TABLE Acteur ADD CONSTRAINT FK_Acteur_IdRoleActeur FOREIGN KEY (IdRoleActeur) REFERENCES RoleActeur(IdRoleActeur);
 ALTER TABLE ActeurArticle ADD CONSTRAINT FK_ActeurArticle_Reference FOREIGN KEY (Reference) REFERENCES Article(Reference);
 ALTER TABLE ActeurArticle ADD CONSTRAINT FK_ActeurArticle_IdActeur FOREIGN KEY (IdActeur) REFERENCES Acteur(IdActeur);
+ALTER TABLE PanierCommande ADD CONSTRAINT FK_PanierCommande_IdEtat FOREIGN KEY (IdEtat) REFERENCES EtatCommande(IdEtat);
 ALTER TABLE PromotionArticle ADD CONSTRAINT FK_PromotionArticle_Reference FOREIGN KEY (Reference) REFERENCES Article(Reference);
 ALTER TABLE PromotionArticle ADD CONSTRAINT FK_PromotionArticle_IdPromotion FOREIGN KEY (IdPromotion) REFERENCES Promotion(IdPromotion);
 ALTER TABLE LigneCommandeFournisseur ADD CONSTRAINT FK_LigneCommandeFournisseur_NumeroCommandeFournisseur FOREIGN KEY (NumeroCommandeFournisseur) REFERENCES CommandeFournisseur(NumeroCommandeFournisseur);
@@ -299,11 +306,19 @@ INSERT INTO Fournisseur VALUES
 GO
 
 INSERT INTO Article VALUES
-('Les 3 mousquetaires', 12, 'kaaris.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consectetur volutpat neque, a cursus nunc iaculis et. In lobortis, ante ullamcorper ultricies eleifend, turpis erat volutpat tellus, non varius lorem metus non turpis. Proin dapibus neque nibh, ut tempor ante eleifend eu. Duis ut arcu ac dolor porttitor pharetra id a erat. Maecenas porttitor condimentum efficitur. Mauris maximus purus sit amet dui molestie dignissim. Quisque lorem erat, interdum at est eu, hendrerit luctus elit.', 1, 3, 1, 1),
-('Miles Davis', 20, 'kaaris.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consectetur volutpat neque, a cursus nunc iaculis et. In lobortis, ante ullamcorper ultricies eleifend, turpis erat volutpat tellus, non varius lorem metus non turpis. Proin dapibus neque nibh, ut tempor ante eleifend eu. Duis ut arcu ac dolor porttitor pharetra id a erat. Maecenas porttitor condimentum efficitur. Mauris maximus purus sit amet dui molestie dignissim. Quisque lorem erat, interdum at est eu, hendrerit luctus elit.', 5, 5, 2, 1),
-('Ghostbusters', 25, 'kaaris.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consectetur volutpat neque, a cursus nunc iaculis et. In lobortis, ante ullamcorper ultricies eleifend, turpis erat volutpat tellus, non varius lorem metus non turpis. Proin dapibus neque nibh, ut tempor ante eleifend eu. Duis ut arcu ac dolor porttitor pharetra id a erat. Maecenas porttitor condimentum efficitur. Mauris maximus purus sit amet dui molestie dignissim. Quisque lorem erat, interdum at est eu, hendrerit luctus elit.', 10, 10, 4, 1);
+('Les 3 mousquetaires', 12, 'kaaris.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consectetur volutpat neque, a cursus nunc iaculis et. In lobortis, ante ullamcorper ultricies eleifend, turpis erat volutpat tellus, non varius lorem metus non turpis. Proin dapibus neque nibh, ut tempor ante eleifend eu. Duis ut arcu ac dolor porttitor pharetra id a erat. Maecenas porttitor condimentum efficitur. Mauris maximus purus sit amet dui molestie dignissim. Quisque lorem erat, interdum at est eu, hendrerit luctus elit.',1, 1, 3, 1, 1),
+('Miles Davis', 20, 'kaaris.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consectetur volutpat neque, a cursus nunc iaculis et. In lobortis, ante ullamcorper ultricies eleifend, turpis erat volutpat tellus, non varius lorem metus non turpis. Proin dapibus neque nibh, ut tempor ante eleifend eu. Duis ut arcu ac dolor porttitor pharetra id a erat. Maecenas porttitor condimentum efficitur. Mauris maximus purus sit amet dui molestie dignissim. Quisque lorem erat, interdum at est eu, hendrerit luctus elit.',0, 5, 5, 2, 1),
+('Ghostbusters', 25, 'kaaris.png', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consectetur volutpat neque, a cursus nunc iaculis et. In lobortis, ante ullamcorper ultricies eleifend, turpis erat volutpat tellus, non varius lorem metus non turpis. Proin dapibus neque nibh, ut tempor ante eleifend eu. Duis ut arcu ac dolor porttitor pharetra id a erat. Maecenas porttitor condimentum efficitur. Mauris maximus purus sit amet dui molestie dignissim. Quisque lorem erat, interdum at est eu, hendrerit luctus elit.',1, 10, 10, 4, 1);
 GO
 
 INSERT INTO Client VALUES
 ('TOTO', 'Titi', '5 rue Tata', 38000, 'Grenoble', 'toto@toto.fr', '0102030405', 'toto');
+GO
+
+INSERT INTO EtatCommande VALUES
+('En attente de paiement'),
+('En attente de réapprovisionement'),
+('Validée'),
+('En cours de livraison'),
+('Livrée');
 GO
