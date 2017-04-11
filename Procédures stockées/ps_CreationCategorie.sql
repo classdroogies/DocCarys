@@ -12,40 +12,40 @@ CREATE PROCEDURE ps_CreationCategorie(@pLibelleCategorie varchar(200),
 								      @oMessage varchar(200) OUTPUT)
 --ALTER PROCEDURE ps_CreationCategorie(@pLibelleCategorie varchar(200), @pTauxTva float, @oId int OUTPUT, @oMessage varchar(200) OUTPUT)
 /****************************************************************************************
- * Procédure ps_CreationCategorie *	Auteur : Corentin ROGERÉ							*
+ * ProcÃ©dure ps_CreationCategorie *	Auteur : Corentin ROGERÃ‰							*
  ****************************************************************************************
- * Cette procédure permet de créer un nouvelle catégorie.								*
- * La procédure est sécurisée.															*
+ * Cette procÃ©dure permet de crÃ©er un nouvelle catÃ©gorie.								*
+ * La procÃ©dure est sÃ©curisÃ©e.															*
  *																						*
- * Paramètres :																			*
- *		- pLibelleCategrie : libellé de a catégorie,									*
- *		- pTauxTva : taux de tva de la catégorie,										*
- *		- oId : identifiant de la catégorie,											*
- *		- oMessage : message de sortie de la procédure.									*
+ * ParamÃ¨tres :																			*
+ *		- pLibelleCategrie : libellÃ© de a catÃ©gorie,									*
+ *		- pTauxTva : taux de tva de la catÃ©gorie,										*
+ *		- oId : identifiant de la catÃ©gorie,											*
+ *		- oMessage : message de sortie de la procÃ©dure.									*
  *																						*
- * Retourne le résultat de l'exécution de la procédure :								*
- *		- 0 : tout s'est bien passé,													*
- *		- 1 : un paramètre est manquant/vide (= null),									*
- *		- 2 : un paramètre n'est pas conforme (pb valeur/format),						*
- *		- 3 : un élément demandé n'existe pas,											*
- *		- 4 : une action est redondante(déjà fait, déjà créé),							*
- *		- 5 : une action est interdite, impossible (règle de gestion),					*
- *		- 9 : problème sur la base de données.											*
+ * Retourne le rÃ©sultat de l'exÃ©cution de la procÃ©dure :								*
+ *		- 0 : tout s'est bien passÃ©,													*
+ *		- 1 : un paramÃ¨tre est manquant/vide (= null),									*
+ *		- 2 : un paramÃ¨tre n'est pas conforme (pb valeur/format),						*
+ *		- 3 : un Ã©lÃ©ment demandÃ© n'existe pas,											*
+ *		- 4 : une action est redondante(dÃ©jÃ  fait, dÃ©jÃ  crÃ©Ã©),							*
+ *		- 5 : une action est interdite, impossible (rÃ¨gle de gestion),					*
+ *		- 9 : problÃ¨me sur la base de donnÃ©es.											*
  ****************************************************************************************/		
  AS
-	/* Déclaration des variables */
-	declare	@codeRet int,				-- Rapport d'exécution de la procédure
-			@reussite int,				-- sert à affecter codeRet quand tout s'est bien passé
-			@paramManquant int,			-- sert à affecter codeRet en cas de paramètre manquant
-			@paramNonConforme int,		-- sert à affecter codeRet en cas de parametre non conforme
-			@paramInexistant int,		-- sert à affecter codeRet en cas de paramètre inexistant dans la base
-			@dejaFait int,				-- sert à affecter codeRet en cas d'action déjà faite
-			@actionInterdite int,		-- sert à affecter codeRet en cas d'action allant à l'encontre des régles de gestion
-			@pbBase int,				-- sert à affecter codeRet quand il y a un problème sur la base de données
-			@trancountOrigine int,		-- sert à stocker le trancount d'origine en cas d'annulation
-			@dummy int;					-- sert à vérouiller les tables sans lancer de résultats
+	/* DÃ©claration des variables */
+	declare	@codeRet int,				-- Rapport d'exÃ©cution de la procÃ©dure
+			@reussite int,				-- sert Ã  affecter codeRet quand tout s'est bien passÃ©
+			@paramManquant int,			-- sert Ã  affecter codeRet en cas de paramÃ¨tre manquant
+			@paramNonConforme int,		-- sert Ã  affecter codeRet en cas de parametre non conforme
+			@paramInexistant int,		-- sert Ã  affecter codeRet en cas de paramÃ¨tre inexistant dans la base
+			@dejaFait int,				-- sert Ã  affecter codeRet en cas d'action dÃ©jÃ  faite
+			@actionInterdite int,		-- sert Ã  affecter codeRet en cas d'action allant Ã  l'encontre des rÃ©gles de gestion
+			@pbBase int,				-- sert Ã  affecter codeRet quand il y a un problÃ¨me sur la base de donnÃ©es
+			@trancountOrigine int,		-- sert Ã  stocker le trancount d'origine en cas d'annulation
+			@dummy int;					-- sert Ã  vÃ©rouiller les tables sans lancer de rÃ©sultats
 											   
-/* Début */
+/* DÃ©but */
 	/* Initialisation des variables */
 	set @reussite = 0;
 	set @paramManquant = 1;
@@ -55,43 +55,43 @@ CREATE PROCEDURE ps_CreationCategorie(@pLibelleCategorie varchar(200),
 	set @actionInterdite = 5;
 	set @pbBase = 9;
 
-	/* nettoyage du libellé de a catégorie */
+	/* nettoyage du libellÃ© de a catÃ©gorie */
 	SET @pLibelleCategorie = dbo.fn_CleanString(@pLibelleCategorie);
 
-	/* Mise en forme du taux de tva ex. 0.055 pour une TVA à 5.5% 3 chiffres apès la virgule */
+	/* Mise en forme du taux de tva ex. 0.055 pour une TVA Ã  5.5% 3 chiffres apÃ¨s la virgule */
 	if @pTauxTva is not null
 	begin
 		set @pTauxTva = ROUND(@pTauxTva, 3);
 	end
 
-	/* vérification des paramètres */
-	/* vérif de la cohérence du libellé de la catégorie */
+	/* vÃ©rification des paramÃ¨tres */
+	/* vÃ©rif de la cohÃ©rence du libellÃ© de la catÃ©gorie */
 	if @pLibelleCategorie is null
 	begin
-		set @oMessage = ' ** Le libellé de la nouvelle catégorie n''a pas été fourni. ** ';
+		set @oMessage = ' ** Le libellÃ© de la nouvelle catÃ©gorie n''a pas Ã©tÃ© fourni. ** ';
 		set @codeRet = @paramManquant;
 	end
 	else if @pLibelleCategorie LIKE('')
 	begin
-		set @oMessage = ' ** Le libellé de la nouvelle catégorie est vide ou ne contient que des espaces. ** ';
+		set @oMessage = ' ** Le libellÃ© de la nouvelle catÃ©gorie est vide ou ne contient que des espaces. ** ';
 		set @codeRet = @paramNonConforme;
 	end
 
-	/* vérif de la cohérence du taux de tva */
+	/* vÃ©rif de la cohÃ©rence du taux de tva */
 	else if @pTauxTva is null
 	begin
-		set @oMessage = ' ** Le taux de TVA lié à la catégorie n''a pas été fourni. ** ';
+		set @oMessage = ' ** Le taux de TVA liÃ© Ã  la catÃ©gorie n''a pas Ã©tÃ© fourni. ** ';
 		set @codeRet = @paramManquant;
 	end
-	else if @pTauxTva not between 0.0 and 0.50
+	else if @pTauxTva not between 0.0 and 50.0
 	begin
-		set @oMessage = ' ** Le taux de TVA lié à la catégorie doit être compris entre 0.00 et 0.50. ** ';
+		set @oMessage = ' ** Le taux de TVA liÃ© Ã  la catÃ©gorie doit Ãªtre compris entre 0.00 et 50.0. ** ';
 		set @codeRet = @paramNonConforme;
 	end
 
 	else
 	begin try
-		/* récupération de l'état de transaction d'origine */
+		/* rÃ©cupÃ©ration de l'Ã©tat de transaction d'origine */
 		set @trancountOrigine = @@TRANCOUNT;
 
 		/* On lance la transaction pour annuler en cas d'erreur */
@@ -100,22 +100,22 @@ CREATE PROCEDURE ps_CreationCategorie(@pLibelleCategorie varchar(200),
 		/* Verouillage de la table Categorie */
 		select @dummy = 0 from Categorie with (holdlock, tablockx);
 
-		/* Vérification de l'existence de la catégorie */
+		/* VÃ©rification de l'existence de la catÃ©gorie */
 		if exists(select * from Categorie where LibelleCategorie=@pLibelleCategorie)
 		begin
-			set @oMessage = ' ** Il existe déjà une catégorie avec ce même libellé dans la base de données. ** ';
+			set @oMessage = ' ** Il existe dÃ©jÃ  une catÃ©gorie avec ce mÃªme libellÃ© dans la base de donnÃ©es. ** ';
 			set @codeRet = @dejaFait;
-			rollback transaction;	-- Libération des tables
+			rollback transaction;	-- LibÃ©ration des tables
 		end
 
-		/* création de la catégorie */
+		/* crÃ©ation de la catÃ©gorie */
 		else
 		begin
-			/* Enregistrement de la nouvelle Catégorie */
+			/* Enregistrement de la nouvelle CatÃ©gorie */
 			Insert Categorie(LibelleCategorie, Tva)
 			values (@pLibelleCategorie, @pTauxTva);
 
-			/* Récup de l'id */
+			/* RÃ©cup de l'id */
 			set @oId = (select IdCategorie from Categorie where LibelleCategorie = @pLibelleCategorie collate French_CI_AI);
 
 			/* Validation de la transaction */
@@ -128,16 +128,16 @@ CREATE PROCEDURE ps_CreationCategorie(@pLibelleCategorie varchar(200),
 	
 	end try
 	begin catch
-		/* Problème sur la base de données */
-		set @oMessage = '** Il y a un problème dans la base de données ** ' + ERROR_MESSAGE();
+		/* ProblÃ¨me sur la base de donnÃ©es */
+		set @oMessage = '** Il y a un problÃ¨me dans la base de donnÃ©es ** ' + ERROR_MESSAGE();
 		set @codeRet = @pbBase;
 		while (@@TRANCOUNT > @trancountOrigine)
 		begin
-			/* Annulation de ce qui a été fait */
+			/* Annulation de ce qui a Ã©tÃ© fait */
 			rollback transaction;
 		end
 	end catch
-	/* retour du résultat de la procédure */
+	/* retour du rÃ©sultat de la procÃ©dure */
 	return @codeRet
 /* Fin */
 go

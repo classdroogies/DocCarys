@@ -481,9 +481,9 @@ CREATE PROCEDURE ps_CreationCategorie(@pLibelleCategorie varchar(200),
 		set @oMessage = ' ** Le taux de TVA lié à la catégorie n''a pas été fourni. ** ';
 		set @codeRet = @paramManquant;
 	end
-	else if @pTauxTva not between 0.0 and 0.50
+	else if @pTauxTva not between 0.0 and 50.0
 	begin
-		set @oMessage = ' ** Le taux de TVA lié à la catégorie doit être compris entre 0.00 et 0.50. ** ';
+		set @oMessage = ' ** Le taux de TVA lié à la catégorie doit être compris entre 0.00 et 50.0. ** ';
 		set @codeRet = @paramNonConforme;
 	end
 

@@ -34,7 +34,7 @@ CREATE TABLE Article(
 	PhotoArticle       VARCHAR (200)  ,
 	DescriptionArticle TEXT ,
 	Reapprovisionnable bit   ,	
-	IdStock            INT   ,
+	IdStock            INT  ,
 	IdGenre            INT  NOT NULL ,
 	PrixAchat          FLOAT   ,
 	IdFournisseur      INT  NOT NULL ,
@@ -46,9 +46,9 @@ CREATE TABLE Article(
 ------------------------------------------------------------*/
 CREATE TABLE StockArticle(
 	IdStock         INT IDENTITY (1,1) NOT NULL ,
-	Quantite        INT  NOT NULL ,
-	QuantiteReserve INT  NOT NULL ,
-	Seuil           INT   ,
+	Quantite        INT  NOT NULL DEFAULT  0,
+	QuantiteReserve INT  NOT NULL DEFAULT 0,
+	Seuil           INT NOT NULL DEFAULT 0,
 	Reference       INT  NOT NULL ,
 	CONSTRAINT prk_constraint_StockArticle PRIMARY KEY NONCLUSTERED (IdStock)
 );
@@ -277,22 +277,22 @@ GO
 
 -- Script d'insertion
 INSERT INTO Categorie VALUES
-('Livre', 0.05),
-('CD', 0.2),
-('DVD', 0.2);
+('Livre', 5.5),
+('CD', 20.0),
+('DVD', 20.0);
 GO
 
 INSERT INTO Genre VALUES
-('Littérature', 1),
+('LittÃ©rature', 1),
 ('Roman', 1),
-('Poésie', 1),
-('Bande dessinée', 1),
+('PoÃ©sie', 1),
+('Bande dessinÃ©e', 1),
 ('Jazz', 2),
 ('Pop-Rock', 2),
-('Variété', 2),
+('VariÃ©tÃ©', 2),
 ('Classique', 2),
 ('Policier', 3),
-('Comédie', 3),
+('ComÃ©die', 3),
 ('Action', 3),
 ('Historique', 3);
 GO
@@ -302,7 +302,7 @@ INSERT INTO Fournisseur VALUES
 ('Universal'),
 ('Sony'),
 ('Mercury'),
-('Glénat');
+('GlÃ©nat');
 GO
 
 INSERT INTO Article VALUES
@@ -317,8 +317,8 @@ GO
 
 INSERT INTO EtatCommande VALUES
 ('En attente de paiement'),
-('En attente de réapprovisionement'),
-('Validée'),
+('En attente de rÃ©approvisionement'),
+('ValidÃ©e'),
 ('En cours de livraison'),
-('Livrée');
+('LivrÃ©e');
 GO
