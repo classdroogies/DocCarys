@@ -1,0 +1,17 @@
+SET IDENTITY_INSERT [dbo].[Genre] ON
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (1, N'Littérature', 1)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (2, N'Roman', 1)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (3, N'Poésie', 1)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (4, N'Bande dessinée', 1)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (5, N'Jazz', 2)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (6, N'Pop-Rock', 2)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (7, N'Variété', 2)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (8, N'Classique', 2)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (9, N'Policier', 3)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (10, N'Comédie', 3)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (11, N'Action', 3)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (12, N'Historique', 3)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (13, N'Nouvelles', 1)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (17, N'Informatique', 1)
+INSERT INTO [dbo].[Genre] ([IdGenre], [LibelleGenre], [IdCategorie]) VALUES (19, N'Rap', 2)
+SET IDENTITY_INSERT [dbo].[Genre] OFF
