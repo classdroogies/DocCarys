@@ -31,7 +31,7 @@ CREATE TABLE Article(
 	Reference          INT IDENTITY (1,1) NOT NULL ,
 	LibelleArticle     VARCHAR (200) NOT NULL ,
 	Prix               FLOAT  NOT NULL ,
-	PhotoArticle       VARCHAR (200)  ,
+	PhotoArticle       VARCHAR (200) DEFAULT 'http://placehold.it/200' ,
 	DescriptionArticle TEXT ,
 	Reapprovisionnable bit   ,	
 	IdStock            INT  ,
@@ -160,7 +160,7 @@ CREATE TABLE Acteur(
 -- Table: PanierCommande
 ------------------------------------------------------------*/
 CREATE TABLE PanierCommande(
-	NumeroCommande INT IDENTITY (1,1) NOT NULL ,
+	NumeroCommande INT IDENTITY (0,1) NOT NULL ,
 	DateCommande   DATETIME NOT NULL ,
 	IdEtat         INT  NOT NULL ,
 	IdPaiement  	INT,
@@ -316,9 +316,12 @@ INSERT INTO Client VALUES
 GO
 
 INSERT INTO EtatCommande VALUES
+('Panier'),
 ('En attente de paiement'),
 ('En attente de réapprovisionement'),
-('Validée'),
+('Paiement validé'),
+('Commande terminéé'),
+('Commande partielle'),
 ('En cours de livraison'),
 ('Livrée');
 GO

@@ -2,63 +2,42 @@ use master;
 go
 
 
-use Sebo_Carys
-IF OBJECT_ID ('ps_CreationArticle') IS NOT NULL DROP PROCEDURE ps_CreationArticle
-go
-
-CREATE PROCEDURE ps_CreationArticle(@pLibelleArticle varchar(200),
-								    @pPrix float,
-									@pPhotoArticle varchar(200),
-									@pDescriptionArticle text,
-								    @pIdGenre int,
-									@pPrixFournisseur float,
-									@pIdFournisseur int,
-									@pReapprovisionnable bit,
-								    @oReference int OUTPUT,
-								    @oMessage varchar(200) OUTPUT)
---ALTER PROCEDURE ps_CreationArticle(@pLibelleArticle varchar(200), @pPrix float, @pPhotoArticle varchar(200), @pDescriptionArticle text, @pIdGenre int, @pPrixFournisseur float, @pIdFournisseur int, @pReapprovisionnable bit, @oReference int OUTPUT, @oMessage varchar(200) OUTPUT)
+CREATE PROCEDURE ps_SuppressionArticle(@pRefArticle int,
+									   @oMessage varchar(200) OUTPUT)
+--ALTER PROCEDURE ps_SuppressionArticle(@pRefArticle int, @oMessage varchar(200) OUTPUT)
 /****************************************************************************************
- * ProcÈdure ps_CreationArticle *	Auteur : Corentin ROGER…							*
+ * Proc√©dure ps_SuppressionArticle *	Auteur : Corentin ROGER√â						*
  ****************************************************************************************
- * Cette procÈdure permet de crÈer un nouvel article.									*
- * La procÈdure est sÈcurisÈe.															*
+ * Cette proc√©dure permet de supprimer un article de la base de donn√©es.				*
+ * La proc√©dure est s√©curis√©e.															*
  *																						*
- * ParamËtres :																			*
- *		- pLibelleArticle : libellÈ de l'article,										*
- *		- pPrix : prix de l'article,													*
- *		- pPhotoArticle : nom du fichier contenant la photo de l'article,				*
- *		- pDescriptionArticle : description de l'article,								*
- *		- pIdGenre : identifiant du genre de l'article,									*
- *		- pPrixFournisseur : prix d'achat de l'article,									*
- *		- pIdFournisseur : identifiant du fournisseur,									*
- *		- pReapprovisionnable : indicateur pous savoir si l'article est					*
-							    rÈapprovisionnable										*
- *		- oReference : reference dee l'article,											*
- *		- oMessage : message de sortie de la procÈdure.									*
+ * Param√®tres :																			*
+ *		- pRefArticle : r√©f√©rence de l'article,											*
+ *		- oMessage : message de sortie de la proc√©dure.									*
  *																						*
- * Retourne le rÈsultat de l'exÈcution de la procÈdure :								*
- *		- 0 : tout s'est bien passÈ,													*
- *		- 1 : un paramËtre est manquant/vide (= null),									*
- *		- 2 : un paramËtre n'est pas conforme (pb valeur/format),						*
- *		- 3 : un ÈlÈment demandÈ n'existe pas,											*
- *		- 4 : une action est redondante(dÈj‡ fait, dÈj‡ crÈÈ),							*
- *		- 5 : une action est interdite, impossible (rËgle de gestion),					*
- *		- 9 : problËme sur la base de donnÈes.											*
+ * Retourne le r√©sultat de l'ex√©cution de la proc√©dure :								*
+ *		- 0 : tout s'est bien pass√©,													*
+ *		- 1 : un param√®tre est manquant/vide (= null),									*
+ *		- 2 : un param√®tre n'est pas conforme (pb valeur/format),						*
+ *		- 3 : un √©l√©ment demand√© n'existe pas,											*
+ *		- 4 : une action est redondante(d√©j√† fait, d√©j√† cr√©√©),							*
+ *		- 5 : une action est interdite, impossible (r√®gle de gestion),					*
+ *		- 9 : probl√®me sur la base de donn√©es.											*
  ****************************************************************************************/		
  AS
-	/* DÈclaration des variables */
-	declare	@codeRet int,				-- Rapport d'exÈcution de la procÈdure
-			@reussite int,				-- sert ‡ affecter codeRet quand tout s'est bien passÈ
-			@paramManquant int,			-- sert ‡ affecter codeRet en cas de paramËtre manquant
-			@paramNonConforme int,		-- sert ‡ affecter codeRet en cas de parametre non conforme
-			@paramInexistant int,		-- sert ‡ affecter codeRet en cas de paramËtre inexistant dans la base
-			@dejaFait int,				-- sert ‡ affecter codeRet en cas d'action dÈj‡ faite
-			@actionInterdite int,		-- sert ‡ affecter codeRet en cas d'action allant ‡ l'encontre des rÈgles de gestion
-			@pbBase int,				-- sert ‡ affecter codeRet quand il y a un problËme sur la base de donnÈes
-			@trancountOrigine int,		-- sert ‡ stocker le trancount d'origine en cas d'annulation
-			@dummy int;					-- sert ‡ vÈrouiller les tables sans lancer de rÈsultats
+	/* D√©claration des variables */
+	declare	@codeRet int,				-- Rapport d'ex√©cution de la proc√©dure
+			@reussite int,				-- sert √† affecter codeRet quand tout s'est bien pass√©
+			@paramManquant int,			-- sert √† affecter codeRet en cas de param√®tre manquant
+			@paramNonConforme int,		-- sert √† affecter codeRet en cas de param√®tre non conforme
+			@paramInexistant int,		-- sert √† affecter codeRet en cas de param√®tre inexistant dans la base
+			@dejaFait int,				-- sert √† affecter codeRet en cas d'action d√©j√† faite
+			@actionInterdite int,		-- sert √† affecter codeRet en cas d'action allant √† l'encontre des r√®gles de gestion
+			@pbBase int,				-- sert √† affecter codeRet quand il y a un probl√®me sur la base de donn√©es
+			@trancountOrigine int,		-- sert √† stocker le trancount d'origine en cas d'annulation
+			@dummy int;					-- sert √† verrouiller les tables sans lancer de r√©sultats
 											   
-/* DÈbut */
+/* D√©but */
 	/* Initialisation des variables */
 	set @reussite = 0;
 	set @paramManquant = 1;
@@ -68,115 +47,67 @@ CREATE PROCEDURE ps_CreationArticle(@pLibelleArticle varchar(200),
 	set @actionInterdite = 5;
 	set @pbBase = 9;
 
-	/* nettoyage du libellÈ de l'article */
-	SET @pLibelleArticle = dbo.fn_CleanString(@pLibelleArticle);
-
-	/* nettoyage du prix d'achat */
-	if @pPrixFournisseur = 0
+	/* v√©rification des param√®tres */
+	/* v√©rification de la coh√©rence de la r√©f√©rence de l'article */
+	if @pRefArticle is null
 	begin
-		set @pPrixFournisseur = null;
-	end
-
-	/* vÈrification des paramËtres */
-	/* vÈrif de la cohÈrence du libellÈ de l'article */
-	if @pLibelleArticle is null
-	begin
-		set @oMessage = ' ** Le libellÈ du nouvel article n''a pas ÈtÈ fourni. ** ';
+		set @oMessage = ' ** La r√©f√©rence de l''article √† supprimer n''a pas √©t√© fourni. ** ';
 		set @codeRet = @paramManquant;
 	end
-	else if @pLibelleArticle LIKE('')
+	else if @pRefArticle < 1
 	begin
-		set @oMessage = ' ** Le libellÈ du nouvel article est vide ou ne contient que des espaces. ** ';
-		set @codeRet = @paramNonConforme;
-	end
-
-	/* vÈrif de la cohÈrence du prix */
-	else if @pPrix is null
-	begin
-		set @oMessage = ' ** Le prix de l''article n''a pas ÈtÈ fourni. ** ';
-		set @codeRet = @paramManquant;
-	end
-	else if @pPrix not between 0.01 and 100
-	begin
-		set @oMessage = ' ** Le prix de vente de l''article doit Ítre compris entre 0.01Ä et 100Ä. ** ';
-		set @codeRet = @paramNonConforme;
-	end
-
-	/* vÈrif de la cohÈrence de l'identifiant du genre */
-	else if @pIdGenre is null
-	begin
-		set @oMessage = ' ** L''identifiant du genre de l''article n''a pas ÈtÈ fourni. ** ';
-		set @codeRet = @paramManquant;
-	end
-	else if @pIdGenre < 1
-	begin
-		set @oMessage = ' ** L''identifiant du genre de l''article doit Ítre supÈrieur ‡ 0. ** ';
-		set @codeRet = @paramNonConforme;
-	end
-
-	/* vÈrif de la cohÈrence du prix d'achat */
-	else if @pPrixFournisseur is not null and  @pPrixFournisseur not between 0.01 and 50
-	begin
-		set @oMessage = ' ** Le prix d''achat de l''article doit Ítre compris entre 0.01Ä et 50Ä. ** ';
-		set @codeRet = @paramNonConforme;
-	end
-
-	/* vÈrif de la cohÈrence de l'identifiant du fournisseur */
-	else if @pIdFournisseur is null
-	begin
-		set @oMessage = ' ** L''identifiant du fournisseur de l''article n''a pas ÈtÈ fourni. ** ';
-		set @codeRet = @paramManquant;
-	end
-	else if @pIdFournisseur < 1
-	begin
-		set @oMessage = ' ** L''identifiant du fournisseur de l''article doit Ítre supÈrieur ‡ 0. ** ';
+		set @oMessage = ' ** La r√©f√©rence de l''article √† supprimer n''est pas correct il doit √™tre sup√©rieur √† 0.  ** ';
 		set @codeRet = @paramNonConforme;
 	end
 
 	else
 	begin try
-		/* rÈcupÈration de l'Ètat de transaction d'origine */
+		/* r√©cup√©ration de l'√©tat de transaction d'origine */
 		set @trancountOrigine = @@TRANCOUNT;
 
 		/* On lance la transaction pour annuler en cas d'erreur */
 		begin transaction;
 
-		/* Verouillage de la table MODELE */
-		select @dummy = 0 from Article, Fournisseur, Genre with (holdlock, tablockx);
+		/* Verrouillage des tables Article, StockArticle, LigneCommande et LigneCommandeFournisseur */
+		select @dummy = 0 from Article, StockArticle, LigneCommande, LigneCommandeFournisseur with (holdlock, tablockx);
 
-		/* VÈrification de l'existence du genre */
-		if not exists(select * from Genre where IdGenre=@pIdGenre)
+		/* V√©rification de l'existence de l'article */
+		if not exists(select * from Article where Reference=@pRefArticle)
 		begin
-			set @oMessage = ' ** Le genre fourni n''existe pas dans la base de donnÈes. ** ';
-			set @codeRet = @paramInexistant;
-			rollback transaction;	-- LibÈration des tables
+			set @oMessage = ' ** La r√©f√©rence de l''article que vous souhaitez supprimer ne correspond √† aucun article dans la base de donn√©es. ** ';
+			set @codeRet = @paramNonConforme;
+			rollback transaction;	-- Lib√©ration des tables
+		end
+		--/* V√©rification de l'inexistence de Stocks correspondant √† l'article. */
+		--else if exists(select * from StockArticle where Reference=@pRefArticle)
+		--begin
+		--	set @oMessage = ' ** L''article que vous souhaitez supprimer est r√©f√©renc√© dans les stocks, sa suppression est impossible. ** ';
+		--	set @codeRet = @actionInterdite;
+		--	rollback transaction;	-- Lib√©ration des tables
+		--end
+		/* V√©rification de l'inexistence de lignes de commande correspondant √† l'article. */
+		else if exists(select * from LigneCommande where Reference=@pRefArticle)
+		begin
+			set @oMessage = ' ** L''article que vous souhaitez supprimer est r√©f√©renc√© dans au moins une commande, sa suppression est impossible. ** ';
+			set @codeRet = @actionInterdite;
+			rollback transaction;	-- Lib√©ration des tables
+		end
+		/* V√©rification de l'inexistence de lignes de commande fournisseur correspondant √† l'article. */
+		else if exists(select * from LigneCommandeFournisseur where Reference=@pRefArticle)
+		begin
+			set @oMessage = ' ** L''article que vous souhaitez supprimer est r√©f√©renc√© dans au moins une commande fournisseur, sa suppression est impossible. ** ';
+			set @codeRet = @actionInterdite;
+			rollback transaction;	-- Lib√©ration des tables
 		end
 
-		/* VÈrification de l'existence du fournisseur */
-		else if not exists(select * from Fournisseur where IdFournisseur=@pIdFournisseur)
-		begin
-			set @oMessage = ' ** Le fournisseur fourni n''existe pas dans la base de donnÈes. ** ';
-			set @codeRet = @paramInexistant;
-			rollback transaction;	-- LibÈration des tables
-		end
-
-		/* VÈrification de la non existence d'un modËle avec le mÍme nom */
-		else if exists (select * from Article where LibelleArticle = @pLibelleArticle collate French_CI_AI and IdGenre = @pIdGenre and IdFournisseur = @pIdFournisseur)
-		begin
-			set @oMessage = ' ** Un Article avec le mÍme libellÈ, le mÍme genre et le mÍme fournisseur existe dÈj‡ dans la base. ** ';
-			set @codeRet = @dejaFait;
-			rollback transaction;	-- LibÈration des tables
-		end
-
-		/* crÈation de l'article */
+		/* suppression de l'article */
 		else
 		begin
-			/* Enregistrement du nouvel Article */
-			Insert Article(LibelleArticle, Prix,PhotoArticle, DescriptionArticle, IdGenre, PrixFournisseur, IdFournisseur, Reapprovisionnable)
-			values (@pLibelleArticle, @pPrix, @pPhotoArticle, @pDescriptionArticle, @pIdGenre, @pPrixFournisseur, @pIdFournisseur, @pReapprovisionnable);
+			/* suppression du stock associ√© √† l'article */
+			delete from StockArticle where Reference = @pRefArticle;
 
-			/* RÈcup de l'id */
-			set @oReference = (select Reference from Article where LibelleArticle = @pLibelleArticle collate French_CI_AI and IdGenre = @pIdGenre and IdFournisseur = @pIdFournisseur);
+			/* suppression de l'a'rticle */
+			delete from Article where Reference = @pRefArticle;
 
 			/* Validation de la transaction */
 			commit transaction;
@@ -188,16 +119,16 @@ CREATE PROCEDURE ps_CreationArticle(@pLibelleArticle varchar(200),
 	
 	end try
 	begin catch
-		/* ProblËme sur la base de donnÈes */
-		set @oMessage = '** Il y a un problËme dans la base de donnÈes ** ' + ERROR_MESSAGE();
+		/* Probl√®me sur la base de donn√©es */
+		set @oMessage = '** Il y a un probl√®me dans la base de donn√©es ** ' + ERROR_MESSAGE();
 		set @codeRet = @pbBase;
 		while (@@TRANCOUNT > @trancountOrigine)
 		begin
-			/* Annulation de ce qui a ÈtÈ fait */
+			/* Annulation de ce qui a √©t√© fait */
 			rollback transaction;
 		end
 	end catch
-	/* retour du rÈsultat de la procÈdure */
+
+	/* retour du r√©sultat de la proc√©dure */
 	return @codeRet
 /* Fin */
-go
